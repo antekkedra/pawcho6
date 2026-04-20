@@ -4,15 +4,20 @@
 ## Użyte komendy
 ### Polecenie użyte do budowy obrazu
 ```bash
-docker build --build-arg VERSION=1.0 -t sprawozdanie2 .
+DOCKER_BUILDKIT=1 docker build \
+        --no-cache \
+        --ssh default \
+        --build-arg VERSION=2.0 \
+        -t pawcho6:lab6 .
 ```
 ### Polecenie uruchamiające serwer
 ```bash
-docker run -dp 8080:80 --name spr2 sprawozdanie2
+docker run -dp 8080:80 ghcr.io/antekkedra/pawcho6:lab6
+docker run -dp 8080:80 --name lab6 pawcho6:lab6
 ```
 ### Polecenie potwierdzające poprawne funkcjonowanie
 ```bash
-docker inspect --format='{{.State.Health.Status}}' spr2
+docker inspect --format='{{.State.Health.Status}}' lab6
 ```
 ### Polecenie potwierdzające że aplikacja realizuje wymaganą funkcjonalność
 ```bash
