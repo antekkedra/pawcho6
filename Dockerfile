@@ -4,17 +4,13 @@ ADD alpine-minirootfs-3.23.3-x86_64.tar /
 ARG VERSION
 ENV VERSION=${VERSION}
 
-RUN apk add --no-cache bash
+RUN apk add --no-cache bash git openssh-client
+
+RUN mkdir -p ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
 
 WORKDIR /app
 
-COPY <<EOF /app/index.template.html
-<h1>Sprawozdanie 2</h1>
-<p>IP: {{IP}}</p>
-<p>Hostname: {{HOST}}</p>
-<p>Version: {{VERSION}}</p>
-EOF
-
+RUN --mount=type=ssh git clone git@github.com:antekkedra/pawcho6.git .
 
 FROM nginx:alpine
 
@@ -24,21 +20,7 @@ ENV VERSION=${VERSION}
 RUN apk add --no-cache bash curl
 
 COPY --from=builder /app/index.template.html /app/index.template.html
-
-COPY <<'EOF' /start.sh
-#!/bin/sh
-
-IP=$(hostname -i)
-HOST=$(hostname)
-
-sed \
-  -e "s/{{IP}}/$IP/" \
-  -e "s/{{HOST}}/$HOST/" \
-  -e "s/{{VERSION}}/$VERSION/" \
-  /app/index.template.html > /usr/share/nginx/html/index.html
-
-exec nginx -g "daemon off;"
-EOF
+COPY --from=builder /app/start.sh /start.sh
 
 RUN chmod +x /start.sh
 
